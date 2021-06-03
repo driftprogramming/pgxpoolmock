@@ -2,9 +2,9 @@ package pgxpoolmock_test
 
 import (
 	"context"
-	"pgxpoolmock/src/pgxpoolmock"
 	"testing"
 
+	"github.com/denghejun/pgxpoolmock/src/pgxpoolmock"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 )
