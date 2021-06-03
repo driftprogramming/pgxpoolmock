@@ -2,7 +2,7 @@
 // Source: pgx_pool.go
 
 // Package pgxpoolmock is a generated GoMock package.
-package pgxpoolmock
+package v1
 
 import (
 	context "context"

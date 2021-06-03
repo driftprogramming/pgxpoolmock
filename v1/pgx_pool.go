@@ -1,4 +1,4 @@
-package pgxpoolmock
+package v1
 
 import (
 	"context"
