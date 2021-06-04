@@ -6,7 +6,7 @@ I also strongly recommend you use `pgxpool` rather than `pgx` only. see https://
 ### How to install
 
 ```
-go get github.com/driftprogramming/pgxpoolmock
+go get -u github.com/driftprogramming/pgxpoolmock
 ```
 
 ### How to Use
