@@ -1,10 +1,10 @@
-package v1_test
+package pgxpoolmock_test
 
 import (
 	"context"
 	"testing"
 
-	pgxpoolmock2 "github.com/denghejun/pgxpoolmock/v1"
+	"github.com/driftprogramming/pgxpoolmock"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 )
@@ -18,11 +18,11 @@ func TestName(t *testing.T) {
 	t.Parallel()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-	mockPool := pgxpoolmock2.NewMockPgxPool(ctrl)
+	mockPool := pgxpoolmock.NewMockPgxPool(ctrl)
 	columns := []string{"user_name", "age"}
-	pgxRows := pgxpoolmock2.NewRows(columns).AddRow("Leo", 99).AddRow("Tom", 100).ToPgxRows()
+	pgxRows := pgxpoolmock.NewRows(columns).AddRow("Leo", 99).AddRow("Tom", 100).ToPgxRows()
 	mockPool.EXPECT().Query(gomock.Any(), gomock.Any()).Return(pgxRows, nil)
-	// make sure you pass the `mockPool` to your data access object.
+	// you can pass the `mockPool` into your data access object here.
 	actualRows, _ := mockPool.Query(context.Background(), "SELECT MOCK SQL")
 	var users []user
 	for actualRows.Next() {

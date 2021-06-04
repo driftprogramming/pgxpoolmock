@@ -1,4 +1,4 @@
-module github.com/denghejun/pgxpoolmock
+module github.com/driftprogramming/pgxpoolmock
 
 go 1.16
 
