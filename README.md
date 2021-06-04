@@ -11,43 +11,40 @@ go get github.com/driftprogramming/pgxpoolmock
 
 ### How to Use
 
-See file `pgx_pool_mock_test.go` to figure out how to use it. Or see the below:
+See file `order_dao_example_test.go` to figure out how to use it. Or see the below:
 ```go
 package pgxpoolmock_test
 
 import (
-	"context"
 	"testing"
 
 	"github.com/driftprogramming/pgxpoolmock"
+	"github.com/driftprogramming/pgxpoolmock/testdata"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 )
-
-type user struct {
-	UserName string
-	Age      int
-}
 
 func TestName(t *testing.T) {
 	t.Parallel()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
+
+	// given
 	mockPool := pgxpoolmock.NewMockPgxPool(ctrl)
-	columns := []string{"user_name", "age"}
-	pgxRows := pgxpoolmock.NewRows(columns).AddRow("Leo", 99).AddRow("Tom", 100).ToPgxRows()
-	mockPool.EXPECT().Query(gomock.Any(), gomock.Any()).Return(pgxRows, nil)
-	// you can pass the `mockPool` into your data access object here.
-	actualRows, _ := mockPool.Query(context.Background(), "SELECT MOCK SQL")
-	var users []user
-	for actualRows.Next() {
-		u := &user{}
-		actualRows.Scan(&u.UserName, &u.Age)
-		users = append(users, *u)
+	columns := []string{"id", "price"}
+	pgxRows := pgxpoolmock.NewRows(columns).AddRow(100, 100000.9).ToPgxRows()
+	mockPool.EXPECT().Query(gomock.Any(), gomock.Any(), gomock.Any()).Return(pgxRows, nil)
+	orderDao := testdata.OrderDAO{
+		Pool: mockPool,
 	}
 
-	assert.NotNil(t, users)
-	assert.Equal(t, 2, len(users))
+	// when
+	actualOrder := orderDao.GetOrderByID(1)
+
+	// then
+	assert.NotNil(t, actualOrder)
+	assert.Equal(t, 100, actualOrder.ID)
+	assert.Equal(t, 100000.9, actualOrder.Price)
 }
 
 ```
