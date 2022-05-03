@@ -25,3 +25,18 @@ func (dao *OrderDAO) GetOrderByID(id int) *Order {
 
 	return nil
 }
+
+func (dao *OrderDAO) GetOrderMapByID(id int) map[string]interface{} {
+	rows, _ := dao.Pool.Query(context.Background(), "SELECT ID,Price FROM order WHERE ID =$1", id)
+	for rows.Next() {
+		var id, price interface{}
+		rows.Scan(&id, &price)
+		order := map[string]interface{}{
+			"ID":    id,
+			"Price": price,
+		}
+		return order
+	}
+
+	return nil
+}

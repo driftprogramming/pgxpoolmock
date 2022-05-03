@@ -64,7 +64,7 @@ func (rs *rowSets) Values() ([]interface{}, error) {
 func (rs *rowSets) Scan(dest ...interface{}) error {
 	r := rs.sets[rs.pos]
 	if len(dest) != len(r.defs) {
-		return fmt.Errorf("Incorrect argument number %d for columns %d", len(dest), len(r.defs))
+		return fmt.Errorf("incorrect argument number %d for columns %d", len(dest), len(r.defs))
 	}
 	if r.pos == 0 {
 		return nil
@@ -76,22 +76,24 @@ func (rs *rowSets) Scan(dest ...interface{}) error {
 		}
 		destVal := reflect.ValueOf(dest[i])
 		if destVal.Kind() != reflect.Ptr {
-			return fmt.Errorf("Destination argument must be a pointer for column %s", r.defs[i].Name)
+			return fmt.Errorf("destination argument must be a pointer for column %s", r.defs[i].Name)
 		}
 		if col == nil {
 			dest[i] = nil
 			continue
 		}
 		val := reflect.ValueOf(col)
-		if destVal.Elem().Kind() == val.Kind() {
+
+		destKind := destVal.Elem().Kind()
+		if destKind == val.Kind() || destKind == reflect.Interface {
 			if destElem := destVal.Elem(); destElem.CanSet() {
 				destElem.Set(val)
 			} else {
-				return fmt.Errorf("Cannot set destination value for column %s", string(r.defs[i].Name))
+				return fmt.Errorf("cannot set destination value for column %s", string(r.defs[i].Name))
 			}
 		} else {
-			return fmt.Errorf("Destination kind '%v' not supported for value kind '%v' of column '%s'",
-				destVal.Elem().Kind(), val.Kind(), string(r.defs[i].Name))
+			return fmt.Errorf("destination kind '%v' not supported for value kind '%v' of column '%s'",
+				destKind, val.Kind(), string(r.defs[i].Name))
 		}
 	}
 	return r.nextErr[r.pos-1]
