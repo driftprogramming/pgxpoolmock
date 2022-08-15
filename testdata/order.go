@@ -15,6 +15,24 @@ type OrderDAO struct {
 	Pool pgxpoolmock.PgxPool
 }
 
+func (dao *OrderDAO) InsertOrder(order *Order) error {
+	_, err := dao.Pool.Exec(context.Background(), "insert into order (id, price) values ($1, $2)", order.ID, order.Price)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (dao *OrderDAO) GetOneOrderByID(id int) (*Order, error) {
+	order := &Order{}
+	err := dao.Pool.QueryRow(context.Background(), "select id, price from order where id = $1", id).
+		Scan(&order.ID, &order.Price)
+	if err != nil {
+		return nil, err
+	}
+	return order, nil
+}
+
 func (dao *OrderDAO) GetOrderByID(id int) *Order {
 	rows, _ := dao.Pool.Query(context.Background(), "SELECT ID,Price FROM order WHERE ID =$1", id)
 	for rows.Next() {

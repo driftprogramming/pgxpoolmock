@@ -4,7 +4,6 @@ import (
 	"encoding/csv"
 	"fmt"
 	"io"
-	"reflect"
 	"strings"
 
 	"github.com/jackc/pgconn"
@@ -69,32 +68,9 @@ func (rs *rowSets) Scan(dest ...interface{}) error {
 	if r.pos == 0 {
 		return nil
 	}
-	for i, col := range r.rows[r.pos-1] {
-		if dest[i] == nil {
-			//behave compatible with pgx
-			continue
-		}
-		destVal := reflect.ValueOf(dest[i])
-		if destVal.Kind() != reflect.Ptr {
-			return fmt.Errorf("destination argument must be a pointer for column %s", r.defs[i].Name)
-		}
-		if col == nil {
-			dest[i] = nil
-			continue
-		}
-		val := reflect.ValueOf(col)
-
-		destKind := destVal.Elem().Kind()
-		if destKind == val.Kind() || destKind == reflect.Interface {
-			if destElem := destVal.Elem(); destElem.CanSet() {
-				destElem.Set(val)
-			} else {
-				return fmt.Errorf("cannot set destination value for column %s", string(r.defs[i].Name))
-			}
-		} else {
-			return fmt.Errorf("destination kind '%v' not supported for value kind '%v' of column '%s'",
-				destKind, val.Kind(), string(r.defs[i].Name))
-		}
+	err := scanRow(r.rows[r.pos-1], r.defs, dest...)
+	if err != nil {
+		return err
 	}
 	return r.nextErr[r.pos-1]
 }
