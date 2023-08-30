@@ -3,19 +3,25 @@ package pgxpoolmock
 import (
 	"context"
 
-	"github.com/jackc/pgconn"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type PgxPool interface {
-	Close()
-	Exec(ctx context.Context, sql string, arguments ...interface{}) (pgconn.CommandTag, error)
-	Query(ctx context.Context, sql string, args ...interface{}) (pgx.Rows, error)
-	QueryRow(ctx context.Context, sql string, args ...interface{}) pgx.Row
-	QueryFunc(ctx context.Context, sql string, args []interface{}, scans []interface{}, f func(pgx.QueryFuncRow) error) (pgconn.CommandTag, error)
-	SendBatch(ctx context.Context, b *pgx.Batch) pgx.BatchResults
+	Acquire(ctx context.Context) (*pgxpool.Conn, error)
+	AcquireAllIdle(ctx context.Context) []*pgxpool.Conn
+	AcquireFunc(ctx context.Context, f func(*pgxpool.Conn) error) error
 	Begin(ctx context.Context) (pgx.Tx, error)
 	BeginTx(ctx context.Context, txOptions pgx.TxOptions) (pgx.Tx, error)
-	BeginFunc(ctx context.Context, f func(pgx.Tx) error) error
-	BeginTxFunc(ctx context.Context, txOptions pgx.TxOptions, f func(pgx.Tx) error) error
+	Close()
+	Config() *pgxpool.Config
+	CopyFrom(ctx context.Context, tableName pgx.Identifier, columnNames []string, rowSrc pgx.CopyFromSource) (int64, error)
+	Exec(ctx context.Context, sql string, arguments ...any) (pgconn.CommandTag, error)
+	Ping(ctx context.Context) error
+	Query(ctx context.Context, sql string, args ...any) (pgx.Rows, error)
+	QueryRow(ctx context.Context, sql string, args ...any) pgx.Row
+	Reset()
+	SendBatch(ctx context.Context, b *pgx.Batch) pgx.BatchResults
+	Stat() *pgxpool.Stat
 }
