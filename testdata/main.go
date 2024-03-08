@@ -9,7 +9,7 @@ import (
 
 func main() {
 	connectionString := getConnectionString()
-	realPool, _ := pgxpool.Connect(context.Background(), connectionString)
+	realPool, _ := pgxpool.New(context.Background(), connectionString)
 	orderDao := OrderDAO{
 		Pool: realPool,
 	}
