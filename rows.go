@@ -6,10 +6,12 @@ import (
 	"io"
 	"strings"
 
-	"github.com/jackc/pgconn"
-	"github.com/jackc/pgproto3/v2"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 )
+
+// Ensure that pgx.Rows interface is implemented by rowSets
+var _ pgx.Rows = (*rowSets)(nil)
 
 // CSVColumnParser is a function which converts trimmed csv
 // column string to a []byte representation. Currently
@@ -33,10 +35,10 @@ func (rs *rowSets) Err() error {
 }
 
 func (rs *rowSets) CommandTag() pgconn.CommandTag {
-	return pgconn.CommandTag("")
+	return pgconn.NewCommandTag("")
 }
 
-func (rs *rowSets) FieldDescriptions() []pgproto3.FieldDescription {
+func (rs *rowSets) FieldDescriptions() []pgconn.FieldDescription {
 	return rs.sets[rs.pos].defs
 }
 
@@ -90,6 +92,10 @@ func (rs *rowSets) RawValues() [][]byte {
 	return dest
 }
 
+func (rs *rowSets) Conn() *pgx.Conn {
+	return nil
+}
+
 // transforms to debuggable printable string
 func (rs *rowSets) String() string {
 	if rs.empty() {
@@ -136,7 +142,7 @@ func rawBytes(col interface{}) (_ []byte, ok bool) {
 // Rows is a mocked collection of rows to
 // return for Query result
 type Rows struct {
-	defs     []pgproto3.FieldDescription
+	defs     []pgconn.FieldDescription
 	rows     [][]interface{}
 	pos      int
 	nextErr  map[int]error
@@ -148,9 +154,9 @@ type Rows struct {
 // to be used as sql driver.Rows.
 // Use Sqlmock.NewRows instead if using a custom converter
 func NewRows(columns []string) *Rows {
-	var coldefs []pgproto3.FieldDescription
+	var coldefs []pgconn.FieldDescription
 	for _, column := range columns {
-		coldefs = append(coldefs, pgproto3.FieldDescription{Name: []byte(column)})
+		coldefs = append(coldefs, pgconn.FieldDescription{Name: column})
 	}
 	return &Rows{
 		defs:    coldefs,
@@ -242,7 +248,7 @@ type rowSetsWithDefinition struct {
 }
 
 // NewRowsWithColumnDefinition return rows with columns metadata
-func NewRowsWithColumnDefinition(columns ...pgproto3.FieldDescription) *Rows {
+func NewRowsWithColumnDefinition(columns ...pgconn.FieldDescription) *Rows {
 	return &Rows{
 		defs:    columns,
 		nextErr: make(map[int]error),
