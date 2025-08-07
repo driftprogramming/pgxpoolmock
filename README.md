@@ -20,7 +20,7 @@ import (
 
 	"github.com/driftprogramming/pgxpoolmock"
 	"github.com/driftprogramming/pgxpoolmock/testdata"
-	"github.com/golang/mock/gomock"
+	"go.uber.org/mock/gomock"
 	"github.com/stretchr/testify/assert"
 )
 

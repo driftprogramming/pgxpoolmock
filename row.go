@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/jackc/pgproto3/v2"
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
-func scanRow(row []interface{}, defs []pgproto3.FieldDescription, dest ...interface{}) error {
+func scanRow(row []interface{}, defs []pgconn.FieldDescription, dest ...interface{}) error {
 	for i, col := range row {
 		if dest[i] == nil {
 			//behave compatible with pgx
@@ -40,7 +40,7 @@ func scanRow(row []interface{}, defs []pgproto3.FieldDescription, dest ...interf
 
 // Row is a mocked row that can be returned from QueryRow
 type Row struct {
-	defs     []pgproto3.FieldDescription
+	defs     []pgconn.FieldDescription
 	row      []interface{}
 	nextErr  error
 	closeErr error
@@ -58,9 +58,9 @@ func (r *Row) Scan(dest ...interface{}) error {
 }
 
 func NewRow(columns []string, values ...interface{}) *Row {
-	var coldefs []pgproto3.FieldDescription
+	var coldefs []pgconn.FieldDescription
 	for _, column := range columns {
-		coldefs = append(coldefs, pgproto3.FieldDescription{Name: []byte(column)})
+		coldefs = append(coldefs, pgconn.FieldDescription{Name: column})
 	}
 	return &Row{
 		defs: coldefs,

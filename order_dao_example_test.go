@@ -2,12 +2,12 @@ package pgxpoolmock_test
 
 import (
 	"fmt"
+	"go.uber.org/mock/gomock"
 	"testing"
 
 	"github.com/driftprogramming/pgxpoolmock"
 	"github.com/driftprogramming/pgxpoolmock/testdata"
-	"github.com/golang/mock/gomock"
-	"github.com/jackc/pgconn"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -16,7 +16,7 @@ func TestInsertOrder(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockPool := pgxpoolmock.NewMockPgxPool(ctrl)
-	commandTag := pgconn.CommandTag("INSERT 0 1")
+	commandTag := pgconn.NewCommandTag("INSERT 0 1")
 	mockPool.EXPECT().Exec(gomock.Any(), "insert into order (id, price) values ($1, $2)", 1, 2.3).Return(commandTag, nil)
 	orderDao := testdata.OrderDAO{
 		Pool: mockPool,
